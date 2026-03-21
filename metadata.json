@@ -1,0 +1,5 @@
+{
+  "name": "NyayMitra",
+  "description": "India's first voice-first, multilingual legal companion for underserved citizens.",
+  "requestFramePermissions": ["microphone"]
+}

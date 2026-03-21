@@ -1,0 +1,67 @@
+{
+  "entities": {
+    "users": {
+      "title": "User Profile",
+      "description": "Stores user information and preferences",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "email": { "type": "string", "format": "email", "description": "User email" },
+        "displayName": { "type": "string", "description": "User display name" },
+        "photoURL": { "type": "string", "description": "User profile picture URL" },
+        "language": { "type": "string", "description": "Preferred language code" },
+        "persona": { "type": "string", "description": "User persona (e.g., farmer, worker)" },
+        "state": { "type": "string", "description": "User state code (e.g., RJ, UP)" },
+        "onboardingCompleted": { "type": "boolean", "description": "Whether onboarding is finished" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Account creation time" }
+      },
+      "required": ["uid", "email"]
+    },
+    "queries": {
+      "title": "Legal Query",
+      "description": "Stores user questions and AI responses",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "UID of the user who asked" },
+        "inputText": { "type": "string", "description": "The user's question" },
+        "answerText": { "type": "string", "description": "The AI's response" },
+        "citation": { "type": "string", "description": "Legal citation provided" },
+        "actionStep": { "type": "string", "description": "The concrete action step" },
+        "language": { "type": "string", "description": "Language of the query" },
+        "type": { "type": "string", "enum": ["ask", "misinfo"], "description": "Type of query" },
+        "verdict": { "type": "string", "description": "Verdict for misinfo checks" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Query time" }
+      },
+      "required": ["userId", "inputText", "answerText"]
+    },
+    "cases": {
+      "title": "Court Case",
+      "description": "Stores court cases tracked by the user",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "UID of the owner" },
+        "cnrNumber": { "type": "string", "description": "16-digit CNR number" },
+        "title": { "type": "string", "description": "Case title" },
+        "courtName": { "type": "string", "description": "Court name" },
+        "status": { "type": "string", "description": "Current status" },
+        "nextHearingDate": { "type": "string", "description": "Next hearing date" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Tracking start time" }
+      },
+      "required": ["userId", "cnrNumber"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "users",
+      "description": "User profile document"
+    },
+    "/queries/{queryId}": {
+      "schema": "queries",
+      "description": "Legal query history"
+    },
+    "/cases/{caseId}": {
+      "schema": "cases",
+      "description": "Tracked court cases"
+    }
+  }
+}
