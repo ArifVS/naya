@@ -52,7 +52,7 @@ export const NyayMitraChat: React.FC<{ onClose: () => void }> = ({ onClose }) =>
       `;
 
       const response = await GeminiService.generateLegalAnswer(prompt, inputText, { thinking: true });
-      const assistantMsg: Message = { id: (Date.now() + 1).toString(), role: 'assistant', text: response || 'I apologize, I am having trouble processing that.' };
+      const assistantMsg: Message = { id: (Date.now() + 1).toString(), role: 'assistant', text: response.text || 'I apologize, I am having trouble processing that.' };
       setMessages(prev => [...prev, assistantMsg]);
     } catch (err) {
       console.error("Chat error:", err);

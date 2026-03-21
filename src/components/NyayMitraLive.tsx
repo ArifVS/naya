@@ -12,6 +12,7 @@ export const NyayMitraLive: React.FC<NyayMitraLiveProps> = ({ onClose }) => {
   const [isConnected, setIsConnected] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [transcription, setTranscription] = useState<string>('');
+  const [userTranscription, setUserTranscription] = useState<string>('');
   const [isThinking, setIsThinking] = useState(false);
   
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -19,6 +20,7 @@ export const NyayMitraLive: React.FC<NyayMitraLiveProps> = ({ onClose }) => {
   const streamRef = useRef<MediaStream | null>(null);
   const processorRef = useRef<ScriptProcessorNode | null>(null);
   const nextStartTimeRef = useRef<number>(0);
+  const activeSourcesRef = useRef<AudioBufferSourceNode[]>([]);
 
   const startSession = async () => {
     try {
@@ -47,6 +49,14 @@ export const NyayMitraLive: React.FC<NyayMitraLiveProps> = ({ onClose }) => {
           
           if (message.serverContent?.modelTurn?.parts?.[0]?.text) {
             setTranscription(prev => prev + ' ' + message.serverContent.modelTurn.parts[0].text);
+          }
+
+          if (message.serverContent?.outputAudioTranscription) {
+            setTranscription(message.serverContent.outputAudioTranscription.text);
+          }
+
+          if (message.serverContent?.inputAudioTranscription) {
+            setUserTranscription(message.serverContent.inputAudioTranscription.text);
           }
         },
         onclose: () => {
@@ -125,9 +135,22 @@ export const NyayMitraLive: React.FC<NyayMitraLiveProps> = ({ onClose }) => {
     
     source.start(nextStartTimeRef.current);
     nextStartTimeRef.current += buffer.duration;
+    
+    activeSourcesRef.current.push(source);
+    source.onended = () => {
+      activeSourcesRef.current = activeSourcesRef.current.filter(s => s !== source);
+    };
   };
 
   const stopPlayback = () => {
+    activeSourcesRef.current.forEach(source => {
+      try {
+        source.stop();
+      } catch (e) {
+        // Source might have already stopped
+      }
+    });
+    activeSourcesRef.current = [];
     nextStartTimeRef.current = audioContextRef.current?.currentTime || 0;
   };
 
@@ -186,9 +209,16 @@ export const NyayMitraLive: React.FC<NyayMitraLiveProps> = ({ onClose }) => {
 
         <div className="text-center space-y-4">
           <h2 className="text-3xl font-bold">NyayMitra Live</h2>
-          <p className="text-stone-400 text-lg leading-relaxed italic">
-            {transcription || "Speak now, I'm listening to your legal concerns..."}
-          </p>
+          <div className="space-y-2">
+            {userTranscription && (
+              <p className="text-stone-500 text-sm font-medium animate-pulse">
+                You: {userTranscription}
+              </p>
+            )}
+            <p className="text-stone-400 text-lg leading-relaxed italic">
+              {transcription || "Speak now, I'm listening to your legal concerns..."}
+            </p>
+          </div>
         </div>
       </div>
 

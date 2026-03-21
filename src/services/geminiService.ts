@@ -42,7 +42,7 @@ export const GeminiService = {
       config
     });
 
-    return response.text;
+    return response;
   },
 
   async generateSpeech(text: string, voice: 'Kore' | 'Puck' | 'Charon' | 'Fenrir' | 'Zephyr' = 'Kore') {
@@ -92,6 +92,8 @@ export const GeminiService = {
           voiceConfig: { prebuiltVoiceConfig: { voiceName: "Zephyr" } },
         },
         systemInstruction: "You are NyayMitra, an Indian legal assistant. You are having a real-time voice conversation with a user who may be in distress. Be calm, empathetic, and provide accurate legal information in plain language. Keep responses concise for voice interaction.",
+        outputAudioTranscription: {},
+        inputAudioTranscription: {},
       },
     });
   }

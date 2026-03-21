@@ -38,12 +38,15 @@ export const api = {
     }
 
     try {
-      const answerText = await GeminiService.generateLegalAnswer(prompt, inputText, data.options);
+      const response = await GeminiService.generateLegalAnswer(prompt, inputText, data.options);
+      const answerText = response.text;
       const latency = Date.now() - startTime;
 
       // Post-generation guardrails
       const sentences = answerText?.split(/[.।!?]+/).filter(Boolean) || [];
-      const truncatedText = sentences.slice(0, 4).join('. ') + '.';
+      // Allow more sentences for search queries
+      const maxSentences = data.options?.search ? 8 : 4;
+      const truncatedText = sentences.slice(0, maxSentences).join('. ') + '.';
       
       const disclaimer = "Yeh kanoni jaankari hai, kanoni salah nahi. Apne vakeel se salah karein.";
       
@@ -54,6 +57,13 @@ export const api = {
       // Extract action step
       const actionMatch = answerText?.match(/Action:(.*)/i);
       const actionStep = actionMatch ? actionMatch[1].trim() : "Consult a legal aid center.";
+
+      // Extract grounding chunks
+      const groundingChunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks || [];
+      const sources = groundingChunks.map((chunk: any) => ({
+        title: chunk.web?.title || "Legal Source",
+        uri: chunk.web?.uri || "#"
+      })).filter((s: any) => s.uri !== "#");
 
       return {
         data: {
@@ -67,6 +77,7 @@ export const api = {
             },
             action_step: actionStep,
             audio_url: null,
+            sources: sources.length > 0 ? sources : null
           },
           disclaimer,
           latency_ms: latency,
@@ -95,7 +106,8 @@ export const api = {
     `;
     
     try {
-      const responseText = await GeminiService.generateLegalAnswer(prompt, "");
+      const response = await GeminiService.generateLegalAnswer(prompt, "");
+      const responseText = response.text;
       const latency = Date.now() - startTime;
       
       // Parse JSON response

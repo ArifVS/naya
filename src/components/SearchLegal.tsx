@@ -106,6 +106,26 @@ export const SearchLegal: React.FC<SearchLegalProps> = ({ onClose }) => {
                     {results.answer.action_step}
                   </p>
                 </div>
+
+                {results.answer.sources && (
+                  <div className="space-y-3">
+                    <p className="text-xs font-bold text-stone-400 uppercase tracking-widest ml-1">Verified Sources</p>
+                    {results.answer.sources.map((source: any, idx: number) => (
+                      <a 
+                        key={idx}
+                        href={source.uri}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block p-4 bg-white rounded-2xl border border-stone-100 hover:border-stone-300 transition-all group"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium text-stone-700 truncate pr-4">{source.title}</span>
+                          <ChevronRight className="w-4 h-4 text-stone-300 group-hover:text-stone-800 transition-colors" />
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                )}
               </motion.div>
             )}
 
